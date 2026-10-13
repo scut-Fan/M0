@@ -57,7 +57,12 @@ std = (acc / len(data)) ** 0.5
 for v in data:
     if v > mean + 2 * std:                       # 要用绝对值来判断，这里不对
         data.remove(v)
+    elif v < mean + (-2) * std:
+        data.remove(v)                           # 负数时绝对值判断
+    else:
+        cleaned.append(v)                        # 两次判断都没问题就写入cleaned列表中
 
+        
 # --- 输出清洗后的数据 ---                         记得运行的时候这里报错了没法输出清洗的数据
 output_path = os.path.join("/", OUTPUT_DIR, OUTPUT_FILE)
 try:
