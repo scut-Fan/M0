@@ -62,7 +62,7 @@ for k in list(dictionary.keys()):
     elif dictionary[k] < mean + (-2) * std:
         dictionary.pop(k)                             # 负数时绝对值判断
     else:
-        cleaned.append(list(dictionary.items()))       # 两次判断都没问题就写入cleaned列表中
+        cleaned.append((k,dictionary[k]))       # 两次判断都没问题就写入cleaned列表中
 
         
 # --- 输出清洗后的数据 ---                         
@@ -71,7 +71,7 @@ try:
     writer = csv.writer(f)
     writer.writerow(["time", "value"])
     for v in cleaned:
-        writer.writerow([v])                      # cleaned的每一位数据都应该是一个列表
+        writer.writerow(v)                      
 except Exception as e:
     print(f"出现了异常，异常名称为{e}")
 
