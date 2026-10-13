@@ -30,13 +30,14 @@ cleaned = []
 print("=== 传感器数据分析 ===")
 
 # --- 读取数据 ---
-reader = csv.DictReader(open(INPUT_FILE, "r"))
+with open(INPUT_FILE,"r") as f:
+    reader = csv.DictReader(f)
 
-for row in reader:
-    t = float(row["time"])
-    v = float(row["value"])
-    times.append(t)
-    data.append(v)
+    for row in reader:
+        t = float(row["time"])
+        v = float(row["value"])                     #这里是不是有问题？
+        times.append(t)
+        data.append(v)
 
 print("共读取 %d 条数据" % len(data))
 
@@ -49,15 +50,15 @@ mean = total / len(data)
 # --- 计算标准差 ---
 acc = 0
 for v in data:
-    acc += (v - mean)
-std = acc / len(data)
+    acc += (v - mean) ** 2                            # 标准差的公式(已修正)
+std = (acc / len(data)) ** 0.5
 
 # --- 剔除离群值 ---
 for v in data:
-    if v > mean + 2 * std:
+    if v > mean + 2 * std:                       # 要用绝对值来判断，这里不对
         data.remove(v)
 
-# --- 输出清洗后的数据 ---
+# --- 输出清洗后的数据 ---                         记得运行的时候这里报错了没法输出清洗的数据
 output_path = os.path.join("/", OUTPUT_DIR, OUTPUT_FILE)
 try:
     f = open(output_path, "w")
