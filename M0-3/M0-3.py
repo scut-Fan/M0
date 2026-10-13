@@ -26,6 +26,7 @@ OUTPUT_DIR = "out"  # 输出目录
 data = []
 times = []
 cleaned = []
+dictionary = dict()
 
 print("=== 传感器数据分析 ===")
 
@@ -35,9 +36,10 @@ with open(INPUT_FILE,"r") as f:
 
     for row in reader:
         t = float(row["time"])
-        v = float(row["value"])                     #这里是不是有问题？
-        times.append(t)
-        data.append(v)
+        v = float(row["value"])                   
+        times.append(t)         # time
+        data.append(v)          # value
+        dictionary[t] = v      # 创建一个字典来存储键值对
 
 print("共读取 %d 条数据" % len(data))
 
@@ -54,27 +56,26 @@ for v in data:
 std = (acc / len(data)) ** 0.5
 
 # --- 剔除离群值 ---
-for v in data:
-    if v > mean + 2 * std:                       # 要用绝对值来判断，这里不对
-        data.remove(v)
-    elif v < mean + (-2) * std:
-        data.remove(v)                           # 负数时绝对值判断
+for k in list(dictionary.keys()):
+    if dictionary[k] > mean + 2 * std:                # 要用绝对值来判断，这里不对
+        dictionary.pop(k)
+    elif dictionary[k] < mean + (-2) * std:
+        dictionary.pop(k)                             # 负数时绝对值判断
     else:
-        cleaned.append(v)                        # 两次判断都没问题就写入cleaned列表中
+        cleaned.append(list(dictionary.items()))       # 两次判断都没问题就写入cleaned列表中
 
         
-# --- 输出清洗后的数据 ---                         记得运行的时候这里报错了没法输出清洗的数据
-output_path = os.path.join("/", OUTPUT_DIR, OUTPUT_FILE)
+# --- 输出清洗后的数据 ---                         
 try:
-    f = open(output_path, "w")
+    f = open("cleaned_data.csv", "w")
     writer = csv.writer(f)
     writer.writerow(["time", "value"])
     for v in cleaned:
-        writer.writerow([v])
+        writer.writerow([v])                      # cleaned的每一位数据都应该是一个列表
 except Exception as e:
     print(f"出现了异常，异常名称为{e}")
 
 print("均值 mean = %.4f" % mean)
 print("标准差 std = %.4f" % std)
 print("清洗后剩余 %d 条" % len(cleaned))
-print("已保存到 %s" % output_path)
+print("已保存到 %s" % "cleaned_data.csv")
