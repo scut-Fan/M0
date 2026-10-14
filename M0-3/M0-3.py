@@ -31,29 +31,37 @@ dictionary = dict()
 print("=== 传感器数据分析 ===")
 
 # --- 读取数据 ---
-with open(INPUT_FILE,"r") as f:
-    reader = csv.DictReader(f)
-
-    for row in reader:
-        t = float(row["time"])
-        v = float(row["value"])                   
-        times.append(t)         # time
-        data.append(v)          # value
-        dictionary[t] = v      # 创建一个字典来存储键值对
+try:
+    with open(INPUT_FILE,"r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            t = float(row["time"])
+            v = float(row["value"])                   
+            times.append(t)         # time
+            data.append(v)          # value
+            dictionary[t] = v      # 创建一个字典来存储键值对
+except Exception as e:
+    print(f"出现异常，异常名为{e}")
 
 print("共读取 %d 条数据" % len(data))
 
 # --- 计算平均值 ---
 total = 0
-for v in data:
-    total += v
+try:
+    for v in data:
+        total += v
+except Exception as e:
+    print(f"出现异常，异常名为{e}")
 mean = total / len(data)
 
 # --- 计算标准差 ---
 acc = 0
-for v in data:
-    acc += (v - mean) ** 2                            # 标准差的公式(已修正)
-std = (acc / len(data)) ** 0.5
+try:
+    for v in data:
+        acc += (v - mean) ** 2                            # 标准差的公式(已修正)
+    std = (acc / len(data)) ** 0.5
+except Exception as e:
+    print(f"出现异常，异常名为{e}")
 
 # --- 剔除离群值 ---
 for k in list(dictionary.keys()):
