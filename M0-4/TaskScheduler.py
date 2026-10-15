@@ -1,5 +1,6 @@
 import time
 import json
+from collections import deque
 
 READ_FILE = "tasks_demo.json"
 dictionary = {}
@@ -22,8 +23,7 @@ task_graph = {
              "Place" : ("ReturnHome")
              }
              
-# 拓扑排序
-# def tasks_sort(None):
+# 计算有向无环图的入度
 nodes = set()
 value = tuple()
 for k in task_graph.keys():
@@ -49,4 +49,35 @@ for k in task_graph.keys():
 
 print("各节点入度：")
 print(indegree)
+
+# ---拓扑排序---
+def task_sort():
+    """
+    该函数用于实现对文件任务的拓扑排序并按依赖顺序执行，
+    生成一份依赖清单
+    """
+    global task_graph
+    global indegree
+    q = deque()
+    result = []
+    for node in indegree:
+        if indegree[node] == 0:
+            q.append(node)
+    while q:
+        e = q.popleft()
+        result.append(e)
+        if e in task_graph:
+            value = task_graph[e]       # 找到哪些任务依赖这一个节点
+            if not isinstance(value,tuple):
+                value = (value,)
+            for v in value:
+                indegree[v] -= 1
+                if indegree[v] == 0:
+                    q.append(v) 
+    if len(result) == len(indegree):         
+        print(result)
+    else:
+        print("图有环，无法拓扑排序")
+        
+task_sort()
 
