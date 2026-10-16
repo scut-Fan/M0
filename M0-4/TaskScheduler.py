@@ -1,9 +1,40 @@
 import time
 import json
 from collections import deque
+import random
+import signal
 
-READ_FILE = "tasks_demo.json"
+def timeout_handler(second):
+    """
+    该函数用于给整个程序定时，超时则终止程序
+    """
+    signal.signal(signal.SIGALRM, lambda s,f: exit("TIMEOUT"))
+    signal.alarm(second)
+
+start = time.time()      # 开始计时
+
 dictionary = {}
+READ_FILE = "tasks_demo.json"
+status_str = ["SUCCESS","FAILED","RETRY","SKIPPED"]  # 定义任务的四种状态
+final_state = ["SUCCESS","SKIPPED"]
+current_state ["SUCCESS","FAILED","RETRY","SKIPPED"] # 定义任务的当前状态以及最终状态
+
+def color_print(text):
+    """
+         这个函数用于控制台某些字符串的彩色输出
+    """
+    if text == "SUCCESS":
+        print("\033[32mSUCCESS\033[0m")
+    elif text == "FAILED":
+        print("\033[31mFAILED\033[0m")
+    elif text == "RETRY":
+        print("\033[33mRETRY\033[0m")
+    elif text == "SKIPPED":
+        print("\033[34mSKIPPED\033[0m")
+    else:
+        print(text)
+    return text    
+    
 
 with open(READ_FILE, "r") as f:
     dictionary = json.load(f)
@@ -63,9 +94,26 @@ def task_sort():
     for node in indegree:
         if indegree[node] == 0:
             q.append(node)
+            time.sleep(0.5)
     while q:
         e = q.popleft()
         result.append(e)
+        i = 1
+        while i <= 3:
+            time.sleep(0.5)
+            test = random.choices(["SUCCESS","FAILED"], weights = [0.8 , 0.2])[0]
+            # choice返回一个列表，因此要加下标返回单次结果
+            print(f"任务{e}第{i}次尝试结果：",end = "")
+            color_print(test)
+            if test == "SUCCESS":
+                break;
+            else:
+                if i == 3:
+                    print(f"三次都失败！",end = "")
+                    color_print(status_str[3])
+                i += 1
+                
+
         if e in task_graph:
             value = task_graph[e]       # 找到哪些任务依赖这一个节点
             if not isinstance(value,tuple):
@@ -73,11 +121,13 @@ def task_sort():
             for v in value:
                 indegree[v] -= 1
                 if indegree[v] == 0:
-                    q.append(v) 
+                    q.append(v)
     if len(result) == len(indegree):         
         print(result)
     else:
         print("图有环，无法拓扑排序")
         
+        
 task_sort()
-
+end = time.time()
+print(f"共耗时 {end-start:.4f}秒")
